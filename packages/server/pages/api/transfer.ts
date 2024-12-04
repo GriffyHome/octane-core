@@ -1,17 +1,19 @@
-import { PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base58 from 'bs58';
-import { signWithTokenFee, core } from '@candypay/solana-octane-core';
+import { core } from '@candypay/solana-octane-core';
+import type { Cache } from 'cache-manager';
 import {
-    cache,
     connection,
     ENV_SECRET_KEYPAIR,
     cors,
     rateLimit,
     isReturnedSignatureAllowed,
     ReturnSignatureConfigField,
+    cache,
 } from '../../src';
 import config from '../../../../config.json';
+import { TokenFee, sha256, validateTransaction, validateInstructions, validateTransfer, simulateRawTransaction } from '@candypay/solana-octane-core/dist/types/core';
 
 // Endpoint to pay for transactions with an SPL token transfer
 export default async function (request: NextApiRequest, response: NextApiResponse) {
@@ -73,4 +75,63 @@ export default async function (request: NextApiRequest, response: NextApiRespons
         }
         response.status(400).send({ status: 'error', message });
     }
+}
+
+export async function signWithTokenFee(
+    connection: Connection,
+    transaction: Transaction,
+    feePayer: Keypair,
+    maxSignatures: number,
+    lamportsPerSignature: number,
+    allowedTokens: TokenFee[],
+    cache: Cache,
+    sameSourceTimeout = 5000
+): Promise<{ signature: string }> {
+
+    console.log("Sign Txn");
+
+    // Prevent simple duplicate transactions using a hash of the message
+    let key = `transaction/${base58.encode(sha256(transaction.serializeMessage()))}`;
+    if (await cache.get(key)) throw new Error('duplicate transaction');
+    await cache.set(key, true);
+
+    // Check that the transaction is basically valid, sign it, and serialize it, verifying the signatures
+    const { signature, rawTransaction } = await validateTransaction(
+        connection,
+        transaction,
+        feePayer,
+        maxSignatures,
+        lamportsPerSignature
+    );
+
+    console.log("After validate txn");
+
+    await validateInstructions(transaction, feePayer);
+
+    console.log("After validate instructions");
+
+    // Check that the transaction contains a valid transfer to Octane's token account
+    const transfer = await validateTransfer(connection, transaction, allowedTokens);
+
+    console.log("After validate transfer");
+
+    /*
+       An attacker could make multiple signing requests before the transaction is confirmed. If the source token account
+       has the minimum fee balance, validation and simulation of all these requests may succeed. All but the first
+       confirmed transaction will fail because the account will be empty afterward. To prevent this race condition,
+       simulation abuse, or similar attacks, we implement a simple lockout for the source token account
+       for a few seconds after the transaction.
+     */
+    key = `transfer/lastSignature/${transfer.keys.source.pubkey.toBase58()}`;
+    const lastSignature: number | undefined = await cache.get(key);
+    if (lastSignature && Date.now() - lastSignature < sameSourceTimeout) {
+        throw new Error('duplicate transfer');
+    }
+    await cache.set(key, Date.now());
+
+    await simulateRawTransaction(connection, rawTransaction);
+
+    console.log("After simulate instructions");
+
+    return { signature: signature };
 }
