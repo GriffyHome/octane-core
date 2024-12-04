@@ -9,6 +9,7 @@ const body = {
 
 // Endpoint to get Octane's configuration
 export default async function (request: NextApiRequest, response: NextApiResponse) {
+    
     await cors(request, response);
     await rateLimit(request, response);
 
