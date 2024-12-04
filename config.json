@@ -10,7 +10,7 @@
                     "mint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
                     "account": "3M6hmc9juDNXUDADunnvZwz7qmUtdNFeneJzfN8JZomY",
                     "decimals": 9,
-                    "fee": 10000000
+                    "fee": 1000000
                 }
             ]
         },
@@ -20,7 +20,7 @@
                     "mint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
                     "account": "3M6hmc9juDNXUDADunnvZwz7qmUtdNFeneJzfN8JZomY",
                     "decimals": 9,
-                    "fee": 10000000
+                    "fee": 1000000
                 }
             ]
         },
@@ -30,7 +30,7 @@
                     "mint": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
                     "account": "3M6hmc9juDNXUDADunnvZwz7qmUtdNFeneJzfN8JZomY",
                     "decimals": 9,
-                    "fee": 10000000
+                    "fee": 1000000
                 }
             ]
         }
