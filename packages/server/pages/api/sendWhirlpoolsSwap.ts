@@ -1,4 +1,4 @@
-import { sendAndConfirmRawTransaction, Transaction } from '@solana/web3.js';
+import { sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base58 from 'bs58';
 import { signGeneratedTransaction, whirlpools } from '@candypay/solana-octane-core';
@@ -45,10 +45,10 @@ export default async function (request: NextApiRequest, response: NextApiRespons
             Buffer.from(base58.decode(signature))
         );
 
-        await sendAndConfirmRawTransaction(
+        await sendAndConfirmTransaction(
             connection,
-            transaction.serialize(),
-            {commitment: 'confirmed'}
+            transaction,
+            [ENV_SECRET_KEYPAIR]
         );
 
         // Respond with the confirmed transaction signature
