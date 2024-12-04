@@ -151,7 +151,17 @@ export async function validateTransaction(
 
     // Check Octane's RPC node for the blockhash to make sure it's synced and the fee is reasonable
     const message = transaction.compileMessage();
-    const feeCalculator = await connection.getFeeForMessage(message);
+    let feeCalculator = await connection.getFeeForMessage(message);
+    
+    if (!feeCalculator.value) {
+        // Fetch the recent blockhash and fee calculator again
+        const { blockhash } = await connection.getLatestBlockhash();
+        transaction.recentBlockhash = blockhash;
+        feeCalculator = await connection.getFeeForMessage(message);
+        if (!feeCalculator.value) throw new Error('blockhash not found after retry');
+        if (feeCalculator.value > lamportsPerSignature) throw new Error('fee too high');
+    }
+    
     if (!feeCalculator.value) throw new Error('blockhash not found');
     if (feeCalculator.value > lamportsPerSignature) throw new Error('fee too high');
 
