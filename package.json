@@ -28,6 +28,6 @@
         "packages/*"
     ],
     "dependencies": {
-        "@candypay/solana-octane-core": "^0.0.1"
+        "@candypay/solana-octane-core": "*"
     }
 }
