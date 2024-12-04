@@ -18,7 +18,7 @@
         "cli": "dotenv -c -- node .next/server/cli.js"
     },
     "dependencies": {
-        "@candypay/solana-octane-core": "*",
+        "@candypay/solana-octane-core": "^0.0.3",
         "@solana/spl-token": "^0.2.0",
         "@solana/web3.js": "^1.48.0",
         "axios": "^0.27.2",
