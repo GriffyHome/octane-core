@@ -63,7 +63,7 @@ export default async function (request: NextApiRequest, response: NextApiRespons
 
         transaction.addSignature(ENV_SECRET_KEYPAIR.publicKey, Buffer.from(base58.decode(signature)));
         console.log("Send and Confirm Transaction");
-        await sendAndConfirmTransaction(connection, transaction, [ENV_SECRET_KEYPAIR]);
+        await sendAndConfirmRawTransaction(connection, transaction.serialize());
 
         // Respond with the confirmed transaction signature
         response.status(200).send({ status: 'ok', signature });
