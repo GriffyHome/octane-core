@@ -34,6 +34,9 @@ export default async function (request: NextApiRequest, response: NextApiRespons
     }
 
     try {
+
+        console.log("Sign with Token Fee")
+
         const { signature } = await signWithTokenFee(
             connection,
             transaction,
@@ -43,6 +46,8 @@ export default async function (request: NextApiRequest, response: NextApiRespons
             config.endpoints.transfer.tokens.map((token) => core.TokenFee.fromSerializable(token)),
             cache
         );
+
+        console.log(signature);
 
         // @ts-ignore
         if (config.returnSignature !== undefined) {
