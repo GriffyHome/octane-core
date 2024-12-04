@@ -5,7 +5,7 @@ import { connection, rateLimit } from '../../src';
 export default async function (request: NextApiRequest, response: NextApiResponse) {
     await rateLimit(request, response);
 
-    const blockhash = await connection.getRecentBlockhash();
+    const blockhash = await connection.getLatestBlockhash();
 
     response.status(200).send({ blockhash });
 }
