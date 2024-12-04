@@ -1,4 +1,4 @@
-import { Connection, Keypair, PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, sendAndConfirmRawTransaction, sendAndConfirmTransaction, Transaction, TransactionSignature } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base58 from 'bs58';
 import { core } from '@candypay/solana-octane-core';
@@ -95,7 +95,7 @@ export async function signWithTokenFee(
     await cache.set(key, true);
 
     // Check that the transaction is basically valid, sign it, and serialize it, verifying the signatures
-    const { signature, rawTransaction } = await core.validateTransaction(
+    const { signature, rawTransaction } = await validateTransaction(
         connection,
         transaction,
         feePayer,
@@ -133,4 +133,47 @@ export async function signWithTokenFee(
     console.log("After simulate instructions");
 
     return { signature: signature };
+    
+}
+
+export async function validateTransaction(
+    connection: Connection,
+    transaction: Transaction,
+    feePayer: Keypair,
+    maxSignatures: number,
+    lamportsPerSignature: number
+): Promise<{ signature: TransactionSignature; rawTransaction: Buffer }> {
+    // Check the fee payer and blockhash for basic validity
+    if (!transaction.feePayer?.equals(feePayer.publicKey)) throw new Error('invalid fee payer');
+    if (!transaction.recentBlockhash) throw new Error('missing recent blockhash');
+
+    // TODO: handle nonce accounts?
+
+    // Check Octane's RPC node for the blockhash to make sure it's synced and the fee is reasonable
+    const message = transaction.compileMessage();
+    const feeCalculator = await connection.getFeeForMessage(message);
+    if (!feeCalculator.value) throw new Error('blockhash not found');
+    if (feeCalculator.value > lamportsPerSignature) throw new Error('fee too high');
+
+    // Check the signatures for length, the primary signature, and secondary signature(s)
+    if (!transaction.signatures.length) throw new Error('no signatures');
+    if (transaction.signatures.length > maxSignatures) throw new Error('too many signatures');
+
+    const [primary, ...secondary] = transaction.signatures;
+    if (!primary.publicKey.equals(feePayer.publicKey)) throw new Error('invalid fee payer pubkey');
+    if (primary.signature) throw new Error('invalid fee payer signature');
+
+    for (const signature of secondary) {
+        if (!signature.publicKey) throw new Error('missing public key');
+        if (!signature.signature) throw new Error('missing signature');
+    }
+
+    // Add the fee payer signature
+    transaction.partialSign(feePayer);
+
+    // Serialize the transaction, verifying the signatures
+    const rawTransaction = transaction.serialize();
+
+    // Return the primary signature (aka txid) and serialized transaction
+    return { signature: base58.encode(transaction.signature!), rawTransaction };
 }
