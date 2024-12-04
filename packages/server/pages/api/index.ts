@@ -11,6 +11,7 @@ const body = {
 export default async function (request: NextApiRequest, response: NextApiResponse) {
     
     await cors(request, response);
+    
     await rateLimit(request, response);
 
     response.status(200).send(body);
