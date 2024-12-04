@@ -13,7 +13,6 @@ import {
     cache,
 } from '../../src';
 import config from '../../../../config.json';
-import { TokenFee, sha256, validateTransaction, validateInstructions, validateTransfer, simulateRawTransaction } from '@candypay/solana-octane-core/dist/types/core';
 
 // Endpoint to pay for transactions with an SPL token transfer
 export default async function (request: NextApiRequest, response: NextApiResponse) {
@@ -83,7 +82,7 @@ export async function signWithTokenFee(
     feePayer: Keypair,
     maxSignatures: number,
     lamportsPerSignature: number,
-    allowedTokens: TokenFee[],
+    allowedTokens: core.TokenFee[],
     cache: Cache,
     sameSourceTimeout = 5000
 ): Promise<{ signature: string }> {
@@ -91,12 +90,12 @@ export async function signWithTokenFee(
     console.log("Sign Txn");
 
     // Prevent simple duplicate transactions using a hash of the message
-    let key = `transaction/${base58.encode(sha256(transaction.serializeMessage()))}`;
+    let key = `transaction/${base58.encode(core.sha256(transaction.serializeMessage()))}`;
     if (await cache.get(key)) throw new Error('duplicate transaction');
     await cache.set(key, true);
 
     // Check that the transaction is basically valid, sign it, and serialize it, verifying the signatures
-    const { signature, rawTransaction } = await validateTransaction(
+    const { signature, rawTransaction } = await core.validateTransaction(
         connection,
         transaction,
         feePayer,
@@ -106,12 +105,12 @@ export async function signWithTokenFee(
 
     console.log("After validate txn");
 
-    await validateInstructions(transaction, feePayer);
+    await core.validateInstructions(transaction, feePayer);
 
     console.log("After validate instructions");
 
     // Check that the transaction contains a valid transfer to Octane's token account
-    const transfer = await validateTransfer(connection, transaction, allowedTokens);
+    const transfer = await core.validateTransfer(connection, transaction, allowedTokens);
 
     console.log("After validate transfer");
 
@@ -129,7 +128,7 @@ export async function signWithTokenFee(
     }
     await cache.set(key, Date.now());
 
-    await simulateRawTransaction(connection, rawTransaction);
+    await core.simulateRawTransaction(connection, rawTransaction);
 
     console.log("After simulate instructions");
 
