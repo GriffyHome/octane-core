@@ -107,6 +107,7 @@ export async function signWithTokenFee(
 
     await core.validateInstructions(transaction, feePayer);
 
+    console.log(feePayer.publicKey);
     console.log("After validate instructions");
 
     // Check that the transaction contains a valid transfer to Octane's token account
