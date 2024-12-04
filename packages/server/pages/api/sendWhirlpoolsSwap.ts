@@ -1,7 +1,7 @@
 import { sendAndConfirmRawTransaction, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base58 from 'bs58';
-import { signGeneratedTransaction, whirlpools } from '@solana/octane-core';
+import { signGeneratedTransaction, whirlpools } from '@candypay/solana-octane-core';
 import { cache, connection, ENV_SECRET_KEYPAIR, cors, rateLimit } from '../../src';
 
 // Endpoint to pay for transactions with an SPL token transfer

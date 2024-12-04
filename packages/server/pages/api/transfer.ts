@@ -1,7 +1,7 @@
 import { PublicKey, sendAndConfirmRawTransaction, Transaction } from '@solana/web3.js';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import base58 from 'bs58';
-import { signWithTokenFee, core } from '@solana/octane-core';
+import { signWithTokenFee, core } from '@candypay/solana-octane-core';
 import {
     cache,
     connection,

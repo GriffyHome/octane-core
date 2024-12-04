@@ -11,7 +11,7 @@ import {
     ReturnSignatureConfigField,
 } from '../../src';
 import config from '../../../../config.json';
-import { core, createAccountIfTokenFeePaid } from '@solana/octane-core';
+import { core, createAccountIfTokenFeePaid } from '@candypay/solana-octane-core';
 
 // Endpoint to create associated token account with transaction fees and account initialization fees paid by SPL tokens
 export default async function (request: NextApiRequest, response: NextApiResponse) {

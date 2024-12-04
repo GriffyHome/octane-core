@@ -3,7 +3,7 @@ import { PublicKey } from '@solana/web3.js';
 import {
     getMinimumBalanceForRentExemptAccount,
 } from '@solana/spl-token';
-import { PayerUtils, core } from '@solana/octane-core';
+import { PayerUtils, core } from '@candypay/solana-octane-core';
 import { connection, ENV_SECRET_KEYPAIR } from './index';
 import config from '../../../config.json';
 

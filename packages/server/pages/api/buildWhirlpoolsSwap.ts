@@ -7,7 +7,7 @@ import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { Percentage } from '@orca-so/common-sdk';
 
-import { buildWhirlpoolsSwapToSOL, core } from '@solana/octane-core';
+import { buildWhirlpoolsSwapToSOL, core } from '@candypay/solana-octane-core';
 import {
     cache,
     connection,
