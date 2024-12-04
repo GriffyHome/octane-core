@@ -1,7 +1,7 @@
 {
     "rpcUrl": "https://mainnet.helius-rpc.com/?api-key=5df9ba2f-d7f7-4b16-859d-4cb83ccb9ab5",
     "maxSignatures": 2,
-    "lamportsPerSignature": 50000,
+    "lamportsPerSignature": 10000,
     "corsOrigin": true,
     "endpoints": {
         "transfer": {
