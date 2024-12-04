@@ -90,7 +90,7 @@ export async function signWithTokenFee(
     console.log("Sign Txn");
 
     // Prevent simple duplicate transactions using a hash of the message
-    let key = `transaction/${base58.encode(core.sha256(transaction.serializeMessage()))}`;
+    const key = `transaction/${base58.encode(core.sha256(transaction.serializeMessage()))}`;
     if (await cache.get(key)) throw new Error('duplicate transaction');
     await cache.set(key, true);
 
